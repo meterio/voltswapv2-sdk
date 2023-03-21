@@ -1,4 +1,4 @@
-import { BigintIsh, Price, sqrt, Token, CurrencyAmount } from '@uniswap/sdk-core'
+import { BigintIsh, Price, sqrt, Token, CurrencyAmount } from '../core'
 import invariant from 'tiny-invariant'
 import JSBI from 'jsbi'
 import { pack, keccak256 } from '@ethersproject/solidity'
@@ -11,7 +11,7 @@ export const computePairAddress = ({
   FACTORY_ADDRESS,
   tokenA,
   tokenB,
-  INIT_CODE_HASH,
+  INIT_CODE_HASH
 }: {
   FACTORY_ADDRESS: string
   tokenA: Token
@@ -136,7 +136,12 @@ export class Pair {
     }
     return [
       outputAmount,
-      new Pair(this.FACTORY_ADDRESS, inputReserve.add(inputAmount), outputReserve.subtract(outputAmount), this.INIT_CODE_HASH),
+      new Pair(
+        this.FACTORY_ADDRESS,
+        inputReserve.add(inputAmount),
+        outputReserve.subtract(outputAmount),
+        this.INIT_CODE_HASH
+      )
     ]
   }
 
@@ -160,7 +165,12 @@ export class Pair {
     )
     return [
       inputAmount,
-      new Pair(this.FACTORY_ADDRESS, inputReserve.add(inputAmount), outputReserve.subtract(outputAmount), this.INIT_CODE_HASH),
+      new Pair(
+        this.FACTORY_ADDRESS,
+        inputReserve.add(inputAmount),
+        outputReserve.subtract(outputAmount),
+        this.INIT_CODE_HASH
+      )
     ]
   }
 

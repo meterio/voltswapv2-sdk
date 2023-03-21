@@ -1,8 +1,6 @@
-import { Ether, Token, WETH9, CurrencyAmount } from '@uniswap/sdk-core'
+import { Ether, Token, WETH9, CurrencyAmount } from '../core'
 import { Pair, Route } from './index'
-
-const FACTORY_ADDRESS = '0x1111111111111111111111111111111111111111'
-const INIT_CODE_HASH = '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'
+import { INIT_CODE_HASH, FACTORY_ADDRESS } from '../constants'
 
 describe('Route', () => {
   const ETHER = Ether.onChain(1)

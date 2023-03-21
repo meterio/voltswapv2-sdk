@@ -1,9 +1,7 @@
-import { Token, WETH9, Price, CurrencyAmount } from '@uniswap/sdk-core'
+import { Token, WETH9, Price, CurrencyAmount } from '../core'
 import { InsufficientInputAmountError } from '../errors'
 import { computePairAddress, Pair } from './pair'
-
-const FACTORY_ADDRESS = '0x1111111111111111111111111111111111111111'
-const INIT_CODE_HASH = '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'
+import { INIT_CODE_HASH, FACTORY_ADDRESS } from '../constants'
 
 describe('computePairAddress', () => {
   it('should correctly compute the pool address', () => {
@@ -13,9 +11,9 @@ describe('computePairAddress', () => {
       FACTORY_ADDRESS,
       tokenA,
       tokenB,
-      INIT_CODE_HASH,
+      INIT_CODE_HASH
     })
-    expect(result).toEqual('0xb50b5182D6a47EC53a469395AF44e371d7C76ed4')
+    expect(result).toEqual('0x79Ef7e2416e998AD74Aa004953dF06a2DCADB901')
   })
   it('should give same result regardless of token order', () => {
     const USDC = new Token(1, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 18, 'USDC', 'USD Coin')
@@ -26,7 +24,7 @@ describe('computePairAddress', () => {
       FACTORY_ADDRESS,
       tokenA,
       tokenB,
-      INIT_CODE_HASH,
+      INIT_CODE_HASH
     })
 
     tokenA = DAI
@@ -35,7 +33,7 @@ describe('computePairAddress', () => {
       FACTORY_ADDRESS,
       tokenA,
       tokenB,
-      INIT_CODE_HASH,
+      INIT_CODE_HASH
     })
 
     expect(resultA).toEqual(resultB)
@@ -63,7 +61,7 @@ describe('Pair', () => {
   describe('#getAddress', () => {
     it('returns the correct address', () => {
       expect(Pair.getAddress(FACTORY_ADDRESS, USDC, DAI, INIT_CODE_HASH)).toEqual(
-        '0xb50b5182D6a47EC53a469395AF44e371d7C76ed4'
+        '0x79Ef7e2416e998AD74Aa004953dF06a2DCADB901'
       )
     })
   })
