@@ -36,19 +36,22 @@ describe('entities', () => {
             FACTORY_ADDRESS,
             CurrencyAmount.fromRawAmount(tokens[0], decimalize(1, tokens[0].decimals)),
             CurrencyAmount.fromRawAmount(tokens[1], decimalize(1, tokens[1].decimals)),
-            INIT_CODE_HASH
+            INIT_CODE_HASH,
+            false
           ),
           new Pair(
             FACTORY_ADDRESS,
             CurrencyAmount.fromRawAmount(tokens[1], decimalize(1, tokens[1].decimals)),
             CurrencyAmount.fromRawAmount(tokens[2], decimalize(1, tokens[2].decimals)),
-            INIT_CODE_HASH
+            INIT_CODE_HASH,
+            false
           ),
           new Pair(
             FACTORY_ADDRESS,
             CurrencyAmount.fromRawAmount(tokens[2], decimalize(1, tokens[2].decimals)),
             CurrencyAmount.fromRawAmount(WETH9, decimalize(1234, WETH9.decimals)),
-            INIT_CODE_HASH
+            INIT_CODE_HASH,
+            false
           )
         ]
       })
@@ -89,7 +92,8 @@ describe('entities', () => {
                 FACTORY_ADDRESS,
                 CurrencyAmount.fromRawAmount(tokens[1], decimalize(5, tokens[1].decimals)),
                 CurrencyAmount.fromRawAmount(WETH9, decimalize(10, WETH9.decimals)),
-                INIT_CODE_HASH
+                INIT_CODE_HASH,
+                false
               )
             ],
             tokens[1],
@@ -142,7 +146,8 @@ describe('entities', () => {
                       tokens[1].decimals === 9 ? JSBI.BigInt('30090280812437312') : JSBI.BigInt('30090270812437322')
                     )
                   ),
-                  INIT_CODE_HASH
+                  INIT_CODE_HASH,
+                  false
                 )
               ],
               tokens[1],

@@ -11,17 +11,19 @@ export const computePairAddress = ({
   FACTORY_ADDRESS,
   tokenA,
   tokenB,
+  stable,
   INIT_CODE_HASH
 }: {
   FACTORY_ADDRESS: string
   tokenA: Token
   tokenB: Token
   INIT_CODE_HASH: string
+  stable: boolean
 }): string => {
   const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
   return getCreate2Address(
     FACTORY_ADDRESS,
-    keccak256(['bytes'], [pack(['address', 'address'], [token0.address, token1.address])]),
+    keccak256(['bytes'], [pack(['address', 'address', 'bool'], [token0.address, token1.address, stable])]),
     INIT_CODE_HASH
   )
 }
@@ -30,23 +32,31 @@ export class Pair {
   private readonly tokenAmounts: [CurrencyAmount<Token>, CurrencyAmount<Token>]
   public readonly FACTORY_ADDRESS: string
   public readonly INIT_CODE_HASH: string
+  public readonly stable: boolean
 
-  public static getAddress(FACTORY_ADDRESS: string, tokenA: Token, tokenB: Token, INIT_CODE_HASH: string): string {
-    return computePairAddress({ FACTORY_ADDRESS, tokenA, tokenB, INIT_CODE_HASH })
+  public static getAddress(
+    FACTORY_ADDRESS: string,
+    tokenA: Token,
+    tokenB: Token,
+    INIT_CODE_HASH: string,
+    stable: boolean
+  ): string {
+    return computePairAddress({ FACTORY_ADDRESS, tokenA, tokenB, INIT_CODE_HASH, stable })
   }
 
   public constructor(
     FACTORY_ADDRESS: string,
     currencyAmountA: CurrencyAmount<Token>,
     tokenAmountB: CurrencyAmount<Token>,
-    INIT_CODE_HASH: string
+    INIT_CODE_HASH: string,
+    stable: boolean
   ) {
     const tokenAmounts = currencyAmountA.currency.sortsBefore(tokenAmountB.currency) // does safety checks
       ? [currencyAmountA, tokenAmountB]
       : [tokenAmountB, currencyAmountA]
     this.liquidityToken = new Token(
       tokenAmounts[0].currency.chainId,
-      Pair.getAddress(FACTORY_ADDRESS, tokenAmounts[0].currency, tokenAmounts[1].currency, INIT_CODE_HASH),
+      Pair.getAddress(FACTORY_ADDRESS, tokenAmounts[0].currency, tokenAmounts[1].currency, INIT_CODE_HASH, stable),
       18,
       'UNI-V2',
       'Uniswap V2'
@@ -54,6 +64,7 @@ export class Pair {
     this.tokenAmounts = tokenAmounts as [CurrencyAmount<Token>, CurrencyAmount<Token>]
     this.FACTORY_ADDRESS = FACTORY_ADDRESS
     this.INIT_CODE_HASH = INIT_CODE_HASH
+    this.stable = stable
   }
 
   /**
@@ -140,7 +151,8 @@ export class Pair {
         this.FACTORY_ADDRESS,
         inputReserve.add(inputAmount),
         outputReserve.subtract(outputAmount),
-        this.INIT_CODE_HASH
+        this.INIT_CODE_HASH,
+        this.stable
       )
     ]
   }
@@ -169,7 +181,8 @@ export class Pair {
         this.FACTORY_ADDRESS,
         inputReserve.add(inputAmount),
         outputReserve.subtract(outputAmount),
-        this.INIT_CODE_HASH
+        this.INIT_CODE_HASH,
+        this.stable
       )
     ]
   }

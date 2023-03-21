@@ -46,7 +46,7 @@ export interface SwapParameters {
   /**
    * The arguments to pass to the method, all hex encoded.
    */
-  args: (string | string[])[]
+  args: (string | (string | boolean)[][])[]
   /**
    * The amount of wei to send in hex.
    */
@@ -56,7 +56,6 @@ export interface SwapParameters {
 function toHex(currencyAmount: CurrencyAmount<Currency>) {
   return `0x${currencyAmount.quotient.toString(16)}`
 }
-
 const ZERO_HEX = '0x0'
 
 /**
@@ -86,6 +85,11 @@ export abstract class Router {
     const amountIn: string = toHex(trade.maximumAmountIn(options.allowedSlippage))
     const amountOut: string = toHex(trade.minimumAmountOut(options.allowedSlippage))
     const path: string[] = trade.route.path.map((token: Token) => token.address)
+    let routes: (string | boolean)[][] = []
+    for (let i = 0; i < path.length - 1; i++) {
+      let route = [path[i], path[i + 1], false]
+      routes.push(route)
+    }
     const deadline =
       'ttl' in options
         ? `0x${(Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16)}`
@@ -94,26 +98,26 @@ export abstract class Router {
     const useFeeOnTransfer = Boolean(options.feeOnTransfer)
 
     let methodName: string
-    let args: (string | string[])[]
+    let args: (string | (string | boolean)[][])[]
     let value: string
     switch (trade.tradeType) {
       case TradeType.EXACT_INPUT:
         if (etherIn) {
           methodName = useFeeOnTransfer ? 'swapExactMTRForTokensSupportingFeeOnTransferTokens' : 'swapExactMTRForTokens'
           // (uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountOut, path, to, deadline]
+          args = [amountOut, routes, to, deadline]
           value = amountIn
         } else if (etherOut) {
           methodName = useFeeOnTransfer ? 'swapExactTokensForMTRSupportingFeeOnTransferTokens' : 'swapExactTokensForMTR'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, path, to, deadline]
+          args = [amountIn, amountOut, routes, to, deadline]
           value = ZERO_HEX
         } else {
           methodName = useFeeOnTransfer
             ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens'
             : 'swapExactTokensForTokens'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, path, to, deadline]
+          args = [amountIn, amountOut, routes, to, deadline]
           value = ZERO_HEX
         }
         break

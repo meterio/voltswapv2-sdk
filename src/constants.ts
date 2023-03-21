@@ -2,7 +2,7 @@ import JSBI from 'jsbi'
 import { bytecode } from './utils/VoltPair.json'
 import { keccak256 } from '@ethersproject/solidity'
 
-export const FACTORY_ADDRESS = '0x7B5F989c5b707318D83E027485AcBE9A0d512665' // metertest
+export const FACTORY_ADDRESS = '0xb33de8c0843f90655ad6249f20b473a627443d21' // metertest
 export const INIT_CODE_HASH = keccak256(['bytes'], [`${bytecode}`])
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000)
 

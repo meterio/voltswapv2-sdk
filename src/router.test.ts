@@ -5,7 +5,7 @@ import invariant from 'tiny-invariant'
 import { CurrencyAmount, Percent, Ether, Token, WETH9 } from './core'
 import { INIT_CODE_HASH, FACTORY_ADDRESS } from './constants'
 
-function checkDeadline(deadline: string[] | string): void {
+function checkDeadline(deadline: (string | boolean)[][] | string): void {
   expect(typeof deadline).toBe('string')
   invariant(typeof deadline === 'string')
   // less than 5 seconds on the deadline
@@ -21,14 +21,16 @@ describe('Router', () => {
     FACTORY_ADDRESS,
     CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(1000)),
     CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(1000)),
-    INIT_CODE_HASH
+    INIT_CODE_HASH,
+    false
   )
 
   const pair_weth_0 = new Pair(
     FACTORY_ADDRESS,
     CurrencyAmount.fromRawAmount(WETH9[1], '1000'),
     CurrencyAmount.fromRawAmount(token0, '1000'),
-    INIT_CODE_HASH
+    INIT_CODE_HASH,
+    false
   )
 
   describe('#swapCallParameters', () => {
@@ -44,7 +46,10 @@ describe('Router', () => {
         expect(result.methodName).toEqual('swapExactMTRForTokens')
         expect(result.args.slice(0, -1)).toEqual([
           '0x51',
-          [WETH9[1].address, token0.address, token1.address],
+          [
+            [WETH9[1].address, token0.address, false],
+            [token0.address, token1.address, false]
+          ],
           '0x0000000000000000000000000000000000000004'
         ])
         expect(result.value).toEqual('0x64')
@@ -66,7 +71,10 @@ describe('Router', () => {
         expect(result.methodName).toEqual('swapExactMTRForTokens')
         expect(result.args).toEqual([
           '0x51',
-          [WETH9[1].address, token0.address, token1.address],
+          [
+            [WETH9[1].address, token0.address, false],
+            [token0.address, token1.address, false]
+          ],
           '0x0000000000000000000000000000000000000004',
           '0x32'
         ])
@@ -85,7 +93,10 @@ describe('Router', () => {
         expect(result.args.slice(0, -1)).toEqual([
           '0x64',
           '0x51',
-          [token1.address, token0.address, WETH9[1].address],
+          [
+            [token1.address, token0.address, false],
+            [token0.address, WETH9[1].address, false]
+          ],
           '0x0000000000000000000000000000000000000004'
         ])
         expect(result.value).toEqual('0x0')
@@ -100,7 +111,7 @@ describe('Router', () => {
         expect(result.args.slice(0, -1)).toEqual([
           '0x64',
           '0x59',
-          [token0.address, token1.address],
+          [[token0.address, token1.address, false]],
           '0x0000000000000000000000000000000000000004'
         ])
         expect(result.value).toEqual('0x0')
@@ -177,7 +188,10 @@ describe('Router', () => {
           expect(result.methodName).toEqual('swapExactMTRForTokensSupportingFeeOnTransferTokens')
           expect(result.args.slice(0, -1)).toEqual([
             '0x51',
-            [WETH9[1].address, token0.address, token1.address],
+            [
+              [WETH9[1].address, token0.address, false],
+              [token0.address, token1.address, false]
+            ],
             '0x0000000000000000000000000000000000000004'
           ])
           expect(result.value).toEqual('0x64')
@@ -200,7 +214,10 @@ describe('Router', () => {
           expect(result.args.slice(0, -1)).toEqual([
             '0x64',
             '0x51',
-            [token1.address, token0.address, WETH9[1].address],
+            [
+              [token1.address, token0.address, false],
+              [token0.address, WETH9[1].address, false]
+            ],
             '0x0000000000000000000000000000000000000004'
           ])
           expect(result.value).toEqual('0x0')
@@ -223,7 +240,7 @@ describe('Router', () => {
           expect(result.args.slice(0, -1)).toEqual([
             '0x64',
             '0x59',
-            [token0.address, token1.address],
+            [[token0.address, token1.address, false]],
             '0x0000000000000000000000000000000000000004'
           ])
           expect(result.value).toEqual('0x0')

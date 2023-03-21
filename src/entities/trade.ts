@@ -125,12 +125,12 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
    * @param route route of the exact out trade
    * @param amountOut the amount returned by the trade
    */
-  public static exactOut<TInput extends Currency, TOutput extends Currency>(
-    route: Route<TInput, TOutput>,
-    amountOut: CurrencyAmount<TOutput>
-  ): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT> {
-    return new Trade(route, amountOut, TradeType.EXACT_OUTPUT)
-  }
+  // public static exactOut<TInput extends Currency, TOutput extends Currency>(
+  //   route: Route<TInput, TOutput>,
+  //   amountOut: CurrencyAmount<TOutput>
+  // ): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT> {
+  //   return new Trade(route, amountOut, TradeType.EXACT_OUTPUT)
+  // }
 
   public constructor(
     route: Route<TInput, TOutput>,
@@ -185,15 +185,12 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
    */
   public minimumAmountOut(slippageTolerance: Percent): CurrencyAmount<TOutput> {
     invariant(!slippageTolerance.lessThan(ZERO), 'SLIPPAGE_TOLERANCE')
-    if (this.tradeType === TradeType.EXACT_OUTPUT) {
-      return this.outputAmount
-    } else {
+
       const slippageAdjustedAmountOut = new Fraction(ONE)
         .add(slippageTolerance)
         .invert()
         .multiply(this.outputAmount.quotient).quotient
       return CurrencyAmount.fromRawAmount(this.outputAmount.currency, slippageAdjustedAmountOut)
-    }
   }
 
   /**
@@ -319,69 +316,69 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
    * @param currencyAmountOut used in recursion; the original value of the currencyAmountOut parameter
    * @param bestTrades used in recursion; the current list of best trades
    */
-  public static bestTradeExactOut<TInput extends Currency, TOutput extends Currency>(
-    pairs: Pair[],
-    currencyIn: TInput,
-    currencyAmountOut: CurrencyAmount<TOutput>,
-    { maxNumResults = 3, maxHops = 3 }: BestTradeOptions = {},
-    // used in recursion.
-    currentPairs: Pair[] = [],
-    nextAmountOut: CurrencyAmount<Currency> = currencyAmountOut,
-    bestTrades: Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[] = []
-  ): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[] {
-    invariant(pairs.length > 0, 'PAIRS')
-    invariant(maxHops > 0, 'MAX_HOPS')
-    invariant(currencyAmountOut === nextAmountOut || currentPairs.length > 0, 'INVALID_RECURSION')
+  // public static bestTradeExactOut<TInput extends Currency, TOutput extends Currency>(
+  //   pairs: Pair[],
+  //   currencyIn: TInput,
+  //   currencyAmountOut: CurrencyAmount<TOutput>,
+  //   { maxNumResults = 3, maxHops = 3 }: BestTradeOptions = {},
+  //   // used in recursion.
+  //   currentPairs: Pair[] = [],
+  //   nextAmountOut: CurrencyAmount<Currency> = currencyAmountOut,
+  //   bestTrades: Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[] = []
+  // ): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[] {
+  //   invariant(pairs.length > 0, 'PAIRS')
+  //   invariant(maxHops > 0, 'MAX_HOPS')
+  //   invariant(currencyAmountOut === nextAmountOut || currentPairs.length > 0, 'INVALID_RECURSION')
 
-    const amountOut = nextAmountOut.wrapped
-    const tokenIn = currencyIn.wrapped
-    for (let i = 0; i < pairs.length; i++) {
-      const pair = pairs[i]
-      // pair irrelevant
-      if (!pair.token0.equals(amountOut.currency) && !pair.token1.equals(amountOut.currency)) continue
-      if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue
+  //   const amountOut = nextAmountOut.wrapped
+  //   const tokenIn = currencyIn.wrapped
+  //   for (let i = 0; i < pairs.length; i++) {
+  //     const pair = pairs[i]
+  //     // pair irrelevant
+  //     if (!pair.token0.equals(amountOut.currency) && !pair.token1.equals(amountOut.currency)) continue
+  //     if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue
 
-      let amountIn: CurrencyAmount<Token>
-      try {
-        ;[amountIn] = pair.getInputAmount(amountOut)
-      } catch (error) {
-        // not enough liquidity in this pair
-        if (error.isInsufficientReservesError) {
-          continue
-        }
-        throw error
-      }
-      // we have arrived at the input token, so this is the first trade of one of the paths
-      if (amountIn.currency.equals(tokenIn)) {
-        sortedInsert(
-          bestTrades,
-          new Trade(
-            new Route([pair, ...currentPairs], currencyIn, currencyAmountOut.currency),
-            currencyAmountOut,
-            TradeType.EXACT_OUTPUT
-          ),
-          maxNumResults,
-          tradeComparator
-        )
-      } else if (maxHops > 1 && pairs.length > 1) {
-        const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
+  //     let amountIn: CurrencyAmount<Token>
+  //     try {
+  //       ;[amountIn] = pair.getInputAmount(amountOut)
+  //     } catch (error) {
+  //       // not enough liquidity in this pair
+  //       if (error.isInsufficientReservesError) {
+  //         continue
+  //       }
+  //       throw error
+  //     }
+  //     // we have arrived at the input token, so this is the first trade of one of the paths
+  //     if (amountIn.currency.equals(tokenIn)) {
+  //       sortedInsert(
+  //         bestTrades,
+  //         new Trade(
+  //           new Route([pair, ...currentPairs], currencyIn, currencyAmountOut.currency),
+  //           currencyAmountOut,
+  //           TradeType.EXACT_OUTPUT
+  //         ),
+  //         maxNumResults,
+  //         tradeComparator
+  //       )
+  //     } else if (maxHops > 1 && pairs.length > 1) {
+  //       const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
-        // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
-        Trade.bestTradeExactOut(
-          pairsExcludingThisPair,
-          currencyIn,
-          currencyAmountOut,
-          {
-            maxNumResults,
-            maxHops: maxHops - 1
-          },
-          [pair, ...currentPairs],
-          amountIn,
-          bestTrades
-        )
-      }
-    }
+  //       // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
+  //       Trade.bestTradeExactOut(
+  //         pairsExcludingThisPair,
+  //         currencyIn,
+  //         currencyAmountOut,
+  //         {
+  //           maxNumResults,
+  //           maxHops: maxHops - 1
+  //         },
+  //         [pair, ...currentPairs],
+  //         amountIn,
+  //         bestTrades
+  //       )
+  //     }
+  //   }
 
-    return bestTrades
-  }
+  //   return bestTrades
+  // }
 }
